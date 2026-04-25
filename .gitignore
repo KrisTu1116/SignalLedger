@@ -11,3 +11,5 @@ out/
 .env.local
 *.log
 contracts/deployments/
+.cursor/
+.agents/
