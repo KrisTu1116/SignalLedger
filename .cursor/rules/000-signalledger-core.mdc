@@ -1,0 +1,87 @@
+---
+description: Core project rules for SignalLedger. Always apply when working in this repository.
+globs:
+alwaysApply: true
+---
+
+# SignalLedger Core Rules
+
+This repository is for SignalLedger, a BU CAS CS595 / QST IT795 blockchain course project.
+
+SignalLedger is a play-money prediction market for short-horizon campus congestion forecasting.
+
+The MVP question is:
+
+> Will the library occupancy exceed 85% between 8 PM and 10 PM?
+
+## Always Preserve These Constraints
+
+- Play money only.
+- No real-money trading.
+- No gambling mechanics.
+- No production deployment.
+- No PII.
+- No real student tracking.
+- No unrestricted user-generated markets.
+- No production oracle.
+- No full LMSR unless explicitly requested.
+- No unnecessary DeFi mechanics.
+- Focus on one end-to-end library occupancy market.
+
+## Project Goal
+
+Build a local classroom demo that proves this loop:
+
+market creation → YES/NO trade → price update → synthetic-data settlement → payout/redemption → activation staking → simple evaluation
+
+## Blockchain Purpose
+
+Blockchain is used as a transparent rule-enforcement layer for:
+
+- market creation
+- trades
+- balances
+- price updates
+- settlement
+- payout
+- redemption
+- activation staking
+
+Do not describe the project as “blockchain stores campus congestion data.”
+
+The correct framing is:
+
+> Blockchain enforces the prediction market rules.
+
+## Implementation Priority
+
+Working demo comes first.
+
+Prefer simple, readable, testable implementation over complex architecture.
+
+When uncertain, choose the smallest version that supports the final demo.
+
+## Development Behavior
+
+Before making major changes:
+
+1. Inspect existing files.
+2. State the smallest useful next implementation step.
+3. Avoid broad rewrites unless necessary.
+4. Do not expand the product scope without explicit request.
+5. Add or update tests when touching smart contracts.
+6. Update documentation when behavior changes.
+
+## Anti-Patterns
+
+Do not:
+
+- build a generic Polymarket clone
+- introduce real tokens or real money
+- add unnecessary wallet complexity
+- add NFTs
+- add governance tokens
+- add ZK proofs
+- add real campus surveillance
+- add production deployment infrastructure
+- fully implement dining hall or gym before the library market works end-to-end
