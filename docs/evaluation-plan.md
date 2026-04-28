@@ -2,81 +2,76 @@
 
 ## Goal
 
-Demonstrate that a prediction market produces a useful forward-looking signal compared to simpler alternatives.
+Show how a prediction market expresses a **forward-looking** belief (YES price as implied probability) compared to simpler baselines, using **deterministic synthetic** outcomes so in-class demos are reproducible.
 
-## Why Synthetic Data
+## Why synthetic data
 
-Real-time library sensor data is not available for a classroom prototype. Instead, SignalLedger uses deterministic synthetic occupancy data that follows a realistic daily pattern:
+Real-time library occupancy is not wired to this prototype. Synthetic hourly records approximate **evening-heavy** occupancy; a seeded PRNG (`mulberry32`) keeps **repeatable** demos.
 
-- Low occupancy in early morning (2–5%)
-- Gradual increase through the day (30–70%)
-- Peak during evening hours, especially 8–10 PM (82–90%)
-- Decline after 10 PM
+Dataset shape shipped in code:
 
-A seeded pseudo-random number generator (mulberry32) ensures that every run produces the same numbers, making demo results reproducible.
+- **7** simulated prior days (**168** hourly rows) plus **today** (**24** hourly rows).
+- Each row: `locationName`, timestamp, hour, occupancy %, capacity (**500 seats**), occupied seats, `source: synthetic_library_occupancy_data`.
 
-The synthetic dataset contains:
-- 7 days of historical records (one record per hour, 24 × 7 = 168 records)
-- 1 day of "today" records (24 records)
+Peak band **8 PM – 10 PM** is parameterized so demos can exceed threshold **sometimes** depending on RNG output for that build.
 
-Each record includes: `locationName`, `timestamp`, `hour`, `occupancyPercentage`, `capacity`, `occupiedSeats`, `source`.
+---
 
-## How Settlement Works
+## How settlement aligns with evaluation
 
-1. The oracle helper reads "today"'s synthetic records.
-2. It filters to the market window (8 PM – 10 PM, hours 20 and 21).
-3. It computes `actualValue` = maximum occupancy percentage in that window.
-4. It compares `actualValue` against the market threshold (85%).
-5. If `actualValue >= 85` → **YES wins**. Otherwise → **NO wins**.
+Oracle helper (**off-chain**) steps:
 
-In a real system, this would read from a campus sensor API. For the demo, the synthetic data module acts as the data source.
+1. Filter **hours 20–21**.
+2. `actualValue` = **max** occupancy % in window.
+3. Compare **`actualValue` ≥ threshold (85)** → outcome **YES**, else **NO**.
 
-## Methods Compared
+The ** Solidity** contract resolves `settleMarket(marketId, actualValue)` the same inequality.
 
-| Method | Signal | Source | Type |
-|--------|--------|--------|------|
-| Market Forecast | Final YES price as implied probability | SignalLedger contract | Forward-looking, incentivized |
-| Historical Average | Fraction of past 7 evenings exceeding 85% | Synthetic historical data | Backward-looking |
-| Plain Poll | Simple yes/no vote percentage (60% yes) | Mock poll | Unweighted opinions |
+**Implementation note:** Scripts and frontend settlement pass the **computed** `actualValue` (e.g. **89** in the shipped deterministic path) so ledger truth matches the synthetic oracle.
 
-### Market Forecast
+---
 
-The final YES price from the prediction market is interpreted as an implied probability. For example, a YES price of 5357 bps means the market implies a 53.57% chance of exceeding 85% occupancy.
+## Methods compared
 
-The key advantage: traders who buy shares are putting play-money credits at risk, so the price reflects weighted conviction rather than costless opinions.
+| Method | Signal | Implemented by |
+|--------|--------|----------------|
+| **Market Forecast** | Final YES implied probability | User enters **basis points** (e.g., final `getCurrentPrices` YES leg) · API `?yesPriceBps=` |
+| **Historical Average** | Fraction of prior **7 evenings** exceeding **threshold** inside window | `web/src/lib/evaluation.ts` |
+| **Plain Poll** | Fixed **mock** positivity **60%** | Stub constant |
 
-### Historical Average
+**Classification rule:**
 
-For each of the past 7 evenings, check whether the max occupancy in the 8–10 PM window exceeded 85%. The fraction of evenings that exceeded is the historical probability.
+- Probability **≥ 0.5 → predict YES**.
+- Probability **< 0.5 → predict NO**.
+- Correct if prediction matches **actual** YES / NO settlement.
 
-This is backward-looking — it tells you what typically happened, not what traders currently believe about tonight.
+Displayed on `/evaluation`.
 
-### Plain Poll
+---
 
-A mock campus poll where 60% of respondents said "yes, the library will be crowded tonight." This is a simple unweighted average of opinions with no cost to participating.
+## Limitations — presentation honesty
 
-## Metric
+Single resolved event → illustrative **not** statistically robust.
 
-Binary accuracy: did the method's implied probability correctly indicate the actual outcome?
+Trader count tiny → noisy price discovery.
 
-- If implied probability ≥ 50% → predicted YES
-- If implied probability < 50% → predicted NO
-- Compare predicted outcome against actual outcome
+Historical baseline uses synthetic **past** evenings only.
 
-## Presentation
+Poll unweighted mock — zero stake.
 
-The evaluation page displays:
+Play-money credits — **not** equivalent to real incentives.
 
-1. A table with all three methods, their probabilities, predictions, and correctness.
-2. The actual outcome and actual occupancy value.
-3. A short narrative explaining why the market signal is conceptually different from the baselines.
+Do **not** claim peer-reviewed forecasting accuracy.
 
-## Limitations
+---
 
-- **One market, one evening.** This is a classroom demonstration, not a statistical study. Comparing accuracy on a single binary event is illustrative, not rigorous.
-- **Synthetic data.** The occupancy pattern is plausible but invented. Real campus data may behave differently.
-- **Mock poll.** The 60% figure is fixed, not collected from real respondents.
-- **Small trader pool.** With only 2 demo traders, the market price reflects very limited information.
-- **No real incentives.** Play money does not create the same incentive alignment as real-money prediction markets.
+## Where to see it
 
-Despite these limitations, the demo successfully shows the conceptual distinction: a prediction market aggregates forward-looking, incentivized beliefs, while a dashboard shows the past and a poll shows unweighted opinions.
+- **UI:** `/evaluation` — table + summary text.
+- **API:** `GET /api/evaluation?yesPriceBps=5357` (example matches default seed script post-trade YES price **~5357 bps**).
+
+---
+
+## Scope echo
+
+One **library** market is **fully** instrumented; dining / gym appear as **activation staking** exercises only.

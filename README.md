@@ -1,158 +1,203 @@
 # SignalLedger
 
-A play-money prediction market for short-horizon campus congestion forecasting.
+## 1. Project overview
 
-Built for **BU CAS CS595 / QST IT795: Blockchains and their Applications**.
+**SignalLedger** is a play-money prediction market prototype for short-horizon campus congestion forecasting.
 
-## MVP Question
+**Course:** BU CAS CS595 / QST IT795 — *Blockchains and their Applications*
+
+**MVP question:**
 
 > Will the library occupancy exceed 85% between 8 PM and 10 PM?
 
-## How It Works
+Students register, trade YES/NO shares (internal credits only), see prices move after trades, settle the market using deterministic synthetic library occupancy data, redeem winning shares, optionally stake credits toward **candidate** dining-hall and gym markets, and compare the market’s implied probability to simple baselines.
 
-1. Users register and receive play-money credits.
-2. Admin creates a binary YES/NO congestion market.
-3. Users buy YES or NO shares — prices update after each trade.
-4. Synthetic occupancy data settles the market.
-5. Winners redeem shares for credits; losers get zero.
-6. Users can stake credits to activate new market proposals.
-7. An evaluation compares the market forecast against simpler baselines.
+The project is a **local classroom demo**: no real money, no production deployment, no real student data.
 
-Blockchain enforces all market rules transparently — no operator can silently alter balances, trades, or settlement.
+---
 
-## Repository Structure
+## 2. Blockchain justification
 
-```
-contracts/          Solidity smart contract + Hardhat tests & scripts
-  contracts/        Solidity source files
-  test/             TypeScript tests
-  scripts/          Deploy, seed, and settle scripts
-web/                Next.js frontend
-  src/app/          Pages (App Router)
-  src/components/   Reusable UI components
-  src/lib/          Helpers (synthetic data, evaluation, contract)
-  src/types/        Shared TypeScript types
-docs/               Project documentation
-```
+Blockchain is used as a **transparent rule-enforcement layer**, not as “the database for campus sensors.”
 
-## Prerequisites
+On-chain rules include: who is registered, play-money balances, market state, YES/NO trades, price updates (via demand and a simple AMM formula), admin settlement, redemption, and activation staking. Anyone with the contract address and RPC can verify that balances and outcomes follow the same code.
 
-- Node.js >= 18
-- npm >= 9
+A central server could store the same facts, but **a single operator could change balances or settlement off the record**. A smart contract commits the rules in public bytecode and makes state changes auditable through transactions and events.
 
-## Quick Start
+---
 
-### 1. Install contract dependencies
+## 3. MVP scope
+
+**In scope:**
+
+- One fully wired **library occupancy** market (create → trade → settle → redeem).
+- Synthetic library occupancy data + oracle-style helper (max occupancy in 8–10 PM window vs 85% threshold).
+- Simple AMM-style pricing (not full LMSR).
+- Activation staking for **two candidate** questions (dining hall wait, gym occupancy) — staking only; they do not auto-deploy new full markets.
+
+**Out of scope (by design):**
+
+- Real-money trading, ERC-20, or production wallet products.
+- Production oracle or real campus APIs.
+- Unlimited user-created markets; only admin-created official market + user-created *requests* with staking.
+
+---
+
+## 4. Local setup
+
+**Prerequisites**
+
+- Node.js ≥ 18  
+- npm ≥ 9  
+
+**Clone and install**
 
 ```bash
-cd contracts
-npm install
+git clone <your-repo-url>
+cd FinalBlock
 ```
 
-### 2. Compile the smart contract
+Install **contracts** and **web** separately:
+
+```bash
+cd contracts && npm install
+cd ../web && npm install
+```
+
+---
+
+## 5. How to run contract tests
+
+From the `contracts` folder:
 
 ```bash
 cd contracts
 npx hardhat compile
-```
-
-### 3. Run tests
-
-```bash
-cd contracts
 npx hardhat test
 ```
 
-All 28 tests should pass, covering registration, trading, settlement, redemption, and activation staking.
+Expect **28 passing** tests (registration, trading, settlement, redemption, activation staking, view helpers).
 
-### 4. Start a local Hardhat node
+---
 
-Open a terminal and keep it running:
+## 6. How to start local Hardhat node
+
+Keep this terminal open:
 
 ```bash
 cd contracts
 npx hardhat node
 ```
 
-This starts a local Ethereum network at `http://127.0.0.1:8545` with 20 pre-funded accounts.
+Runs a local chain at `http://127.0.0.1:8545` with standard Hardhat accounts.
 
-### 5. Deploy the contract
+---
 
-In a **second terminal**:
+## 7. How to deploy contract
+
+With the node running, in a **second** terminal:
 
 ```bash
 cd contracts
 npm run deploy:local
 ```
 
-This deploys SignalLedger and saves the contract address to `contracts/deployments/localhost.json`.
+Deploys `SignalLedger` and writes `contracts/deployments/localhost.json` (address for scripts; this path is gitignored by default).
 
-### 6. Seed demo data
+---
+
+## 8. How to seed demo market
+
+Still on localhost, after deploy:
 
 ```bash
 cd contracts
 npm run seed:local
 ```
 
-This will:
-- Register Alice and Bob (1000 credits each)
-- Create the library occupancy market (threshold: 85%)
-- Alice buys 50 YES shares (price moves up)
-- Bob buys 30 NO shares (price adjusts)
-- Print current prices, balances, and positions
+> **Important:** The MVP library market is **created by this seed script**, not by any frontend admin form. The web UI focuses on trading, settlement, redemption, staking, and evaluation against an already-deployed market — so the seed script must be run **before** opening the frontend or the `/markets` page will show *“No markets found.”*
 
-### 7. Settle the market
+This registers **Alice** and **Bob**, creates the **library** market (threshold 85%), runs sample trades (Alice YES, Bob NO), and prints prices and positions.
+
+Optional — full settle + redeem via CLI:
 
 ```bash
-cd contracts
 npm run settle:local
 ```
 
-This will:
-- Settle with synthetic occupancy data (89% → YES wins)
-- Alice redeems winning YES shares
-- Bob redeems losing NO shares (zero payout)
-- Print final balances and evaluation snapshot
+Settles using the same deterministic synthetic logic as the web oracle helper (max occupancy in the 8–10 PM window; in the shipped implementation this resolves to **89%** for “today,” so **YES** wins if threshold is 85%). Then redeems for Alice and Bob.
 
-### 8. Install frontend dependencies
+---
 
-```bash
-cd web
-npm install
-```
-
-### 9. Start the frontend
+## 9. How to start frontend
 
 ```bash
 cd web
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the app.
+Open **http://localhost:3000**.
 
-## Full Demo Flow (summary)
+> **Run order matters:** start the Hardhat node, deploy, and **seed the library market** (steps 6–8) **before** starting the frontend. The frontend assumes the MVP library market already exists on-chain; it does not provide an admin “create market” form.
+
+The UI expects the contract at the default local address **0x5FbDB2315678afecb367f032d93F642f64180aa3** on chain id **31337** (matches first deploy to a fresh Hardhat node). Uses built-in Hardhat demo keys in the browser **for local demo only** — not for mainnet.
+
+---
+
+## 10. Full demo flow
+
+The first three terminal steps **must run before** the frontend; the seed script is what puts the MVP library market on-chain.
+
+| Step | Where | What |
+|------|--------|------|
+| 1 | Terminal | `npx hardhat node` — start local chain |
+| 2 | Terminal | `npm run deploy:local` — deploy `SignalLedger` |
+| 3 | Terminal | `npm run seed:local` — **create the library market** + register Alice/Bob + sample trades (and optionally `npm run settle:local`) |
+| 4 | Terminal | `cd ../web && npm run dev` — start the frontend |
+| 5 | Web: Home | Explain project and open **Market**, **Requests**, **Evaluation**. |
+| 6 | Web: `/markets` | Pick Alice/Bob/Carol, **Register**, **Buy YES / NO**, see prices refresh. Use **Settle with Synthetic Data** (admin path in UI), then **Redeem**. |
+| 7 | Web: `/requests` | Create candidate requests; **Stake** credits until activation threshold (**500**) is reached. |
+| 8 | Web: `/evaluation` | Adjust YES price (bps) to match final contract YES price if needed; compare market vs historical baseline vs poll. |
+
+Minimal three-terminal overview:
 
 ```
-Terminal 1                          Terminal 2
-──────────                          ──────────
-cd contracts                        
-npx hardhat node                    cd contracts
-  (keep running)                    npm run deploy:local
-                                    npm run seed:local
-                                    npm run settle:local
-                                    cd ../web
-                                    npm run dev
+Terminal 1:  cd contracts && npx hardhat node
+Terminal 2:  cd contracts && npm run deploy:local && npm run seed:local
+             (optional) npm run settle:local
+Terminal 3:  cd web && npm run dev
 ```
 
-## Documentation
+---
 
-- [Architecture](docs/architecture.md)
-- [Demo Script](docs/demo-script.md)
-- [Evaluation Plan](docs/evaluation-plan.md)
+## 11. Limitations
 
-## Constraints
+- **Play money only** — credits are internal `uint256` in the contract, not ETH or ERC-20.
+- **Synthetic data** — no real occupancy sensors; results are deterministic for reproducible demos.
+- **Local Hardhat network** — not audited for production; keys in the frontend are demo keys.
+- **Simplified AMM** — educational price movement, not institutional market making.
+- **Small demo** — a few scripted traders; evaluation on one resolved event is illustrative, not statistically significant.
+- **Admin-created library market** in the default scripts; the UI demonstrates trading and settlement, not permissionless market creation for the MVP market.
 
-- Play money only — no real-money trading.
-- Synthetic data — no real campus sensors.
-- Local Hardhat network — no production deployment.
-- Educational prototype — not a production prediction market.
+---
+
+## Repository layout
+
+```
+contracts/     Hardhat — SignalLedger.sol, tests, deploy/seed/settle scripts
+web/           Next.js — pages, viem contract helpers, synthetic/oracle/evaluation libs, API routes
+docs/          Architecture, demo script, evaluation plan
+README.md      This file
+```
+
+## More documentation
+
+- [docs/architecture.md](docs/architecture.md) — layers, on-chain vs off-chain  
+- [docs/demo-script.md](docs/demo-script.md) — 5-minute presentation outline  
+- [docs/evaluation-plan.md](docs/evaluation-plan.md) — metrics and caveats  
+
+---
+
+## Constraints (course / project rules)
+
+Play money only · No gambling mechanics · No production deployment · No PII · No unrestricted user-generated markets · No production oracle · No full LMSR unless explicitly requested · Focus on one end-to-end library occupancy market  

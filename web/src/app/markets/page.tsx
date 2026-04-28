@@ -45,6 +45,17 @@ function outcomeLabel(o: number): string {
   return o === 1 ? "YES" : o === 2 ? "NO" : "—";
 }
 
+function formatContractTime(ts: bigint): string {
+  if (ts === 0n) return "—";
+  const d = new Date(Number(ts) * 1000);
+  return d.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export default function MarketsPage() {
   const [connected, setConnected] = useState<boolean | null>(null);
   const [selectedUser, setSelectedUser] = useState<DemoUser>("Alice");
@@ -245,6 +256,18 @@ npm run seed:local        # Terminal 2 (optional)`}
           <div>Metric: <span className="font-medium text-gray-900">{market?.metricName}</span></div>
           <div>Threshold: <span className="font-medium text-gray-900">{market?.threshold.toString()}%</span></div>
           <div>Source: <span className="font-medium text-gray-900">{market?.settlementSource}</span></div>
+          <div className="col-span-2">
+            Time Window:{" "}
+            <span className="font-medium text-gray-900">
+              8:00 PM &ndash; 10:00 PM
+            </span>
+            {market && market.startTime > 0n && (
+              <span className="ml-2 text-xs text-gray-500">
+                (contract: {formatContractTime(market.startTime)} &rarr;{" "}
+                {formatContractTime(market.endTime)})
+              </span>
+            )}
+          </div>
         </div>
         <div className="mt-3 flex items-center gap-3">
           <span
