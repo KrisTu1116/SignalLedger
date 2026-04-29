@@ -56,6 +56,32 @@ function formatContractTime(ts: bigint): string {
   });
 }
 
+type RiskLevel = "Low" | "Medium" | "High";
+
+interface DecisionSignal {
+  yesProbability: number;
+  level: RiskLevel;
+  action: string;
+}
+
+function deriveDecisionSignal(yesBps: bigint): DecisionSignal {
+  const yesProbability = Number(yesBps) / 10000;
+  let level: RiskLevel;
+  let action: string;
+  if (yesProbability < 0.4) {
+    level = "Low";
+    action = "Library is likely manageable during this window.";
+  } else if (yesProbability <= 0.7) {
+    level = "Medium";
+    action = "Consider checking alternatives before going.";
+  } else {
+    level = "High";
+    action =
+      "Consider avoiding the library during 8 PM – 10 PM or choosing another study space.";
+  }
+  return { yesProbability, level, action };
+}
+
 export default function MarketsPage() {
   const [connected, setConnected] = useState<boolean | null>(null);
   const [selectedUser, setSelectedUser] = useState<DemoUser>("Alice");
@@ -305,6 +331,51 @@ npm run seed:local        # Terminal 2 (optional)`}
           </div>
         </div>
       </section>
+
+      {/* Decision Signal — interprets YES price as a student-facing decision signal */}
+      {(() => {
+        const signal = deriveDecisionSignal(yesBps);
+        const levelStyles: Record<RiskLevel, string> = {
+          Low: "bg-green-100 text-green-800 border-green-300",
+          Medium: "bg-amber-100 text-amber-800 border-amber-300",
+          High: "bg-red-100 text-red-800 border-red-300",
+        };
+        return (
+          <section className="rounded-lg border bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+              <h4 className="text-sm font-medium">Decision Signal</h4>
+              <span className="text-[10px] uppercase tracking-wide text-gray-400">
+                Illustrative — not financial advice
+              </span>
+            </div>
+
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="rounded border bg-gray-50 p-3 text-center">
+                <div className="text-xs text-gray-500">Current YES Probability</div>
+                <div className="mt-1 text-xl font-bold text-gray-900">
+                  {(signal.yesProbability * 100).toFixed(2)}%
+                </div>
+              </div>
+              <div
+                className={`rounded border p-3 text-center ${levelStyles[signal.level]}`}
+              >
+                <div className="text-xs">Congestion Risk Level</div>
+                <div className="mt-1 text-xl font-bold">{signal.level}</div>
+              </div>
+              <div className="rounded border bg-gray-50 p-3">
+                <div className="text-xs text-gray-500">Suggested Action</div>
+                <div className="mt-1 text-sm text-gray-900">{signal.action}</div>
+              </div>
+            </div>
+
+            <p className="mt-3 text-xs italic text-gray-500">
+              The market price is interpreted as a short-horizon crowding
+              forecast, not as a financial signal. Risk bands: Low &lt; 40%,
+              Medium 40–70%, High &gt; 70%.
+            </p>
+          </section>
+        );
+      })()}
 
       {/* User selection */}
       <section className="rounded-lg border bg-white p-4 shadow-sm">

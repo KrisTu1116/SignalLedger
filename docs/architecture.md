@@ -85,6 +85,80 @@ Nothing on-chain asserts that synthetic numbers came from real buildings; **sett
 
 ---
 
+## Activation Staking as Demand Discovery
+
+Activation staking does more than gate market creation — it is the system's
+**demand-discovery mechanism** for choosing what to forecast next.
+
+| Property | Plain upvote | Activation stake |
+|----------|--------------|------------------|
+| Cost to participate | Free / cheap | Locks scarce play-money credits |
+| Susceptible to spam | Yes (sock-puppets) | No (each unit costs the same scarce credit) |
+| Reveals strength of preference | Only count | Count **× weight** — strong demand visible |
+| Reveals priority across requests | Tied / ambiguous | Total stake naturally **ranks** requests |
+| Future production hook | None | Stake pool can later seed liquidity |
+
+### What total stake measures
+
+For each `MarketRequest`, the contract maintains `totalStake` — the sum of
+all `stakeForRequest` calls against it. Because each credit committed has an
+**opportunity cost** (it leaves the user's spendable balance for trading),
+the magnitude of `totalStake` is a noisier-but-stronger signal of demand
+than counting upvotes:
+
+- **High `totalStake`** ⇒ many users (or a few committed users) want this
+  congestion question forecast next.
+- **Low `totalStake`** ⇒ either nobody cares yet or the question is poorly
+  worded.
+
+### Prioritization for new market launches
+
+The frontend ranks pending requests by `totalStake` descending and labels
+each card:
+
+| Range | Priority badge | Operational reading |
+|-------|---------------|---------------------|
+| `0 – 99` | Low Priority | Don't open a market yet — demand is unclear. |
+| `100 – 299` | Medium Priority | Watch — could be worth admin attention. |
+| `300 – 499` | High Priority | Strong demand — short-list for next launch. |
+| `≥ 500` (≥ `ACTIVATION_THRESHOLD`) | Activated · Ready for market launch | Promote to a full library-style market. |
+
+The contract's `ACTIVATION_THRESHOLD` is the **hard** activation gate; the
+priority bands are a **soft** prioritization layer rendered off-chain. They
+are tuneable demo numbers, not contractual.
+
+### Stake as initial participation incentive pool
+
+In this prototype, stake is recorded but **not** redistributed when a market
+is launched. Conceptually, a future production version could:
+
+- **Subsidise early liquidity** — pay the first traders a tiny rebate from
+  the staked pool to bootstrap price discovery.
+- **Reward stakers** — return their stake plus a share of trading fees once
+  the activated market settles.
+- **Offset oracle costs** — fund oracle / data-feed gas in a permissionless
+  variant.
+
+The shipped UI labels the stake under each request as an *Initial Incentive
+Pool* with explicit "can be interpreted as" / "future production version
+could use" wording so the demo cannot be mistaken for a finished tokenomics
+design.
+
+### Why this is stronger than a simple upvote
+
+Three concrete teaching points for the classroom:
+
+1. **Costly signaling.** Stake is information-revealing because each unit
+   reduces the user's tradeable balance. A free upvote conveys preference
+   ordering but not preference *intensity*.
+2. **Rank-ordering for free.** Sorting by `totalStake` produces a defensible
+   priority queue without governance theatre.
+3. **Forward-compatible.** The same `totalStake` storage slot the demo uses
+   for ranking can later become the funding pool for an activated market —
+   no schema redesign needed.
+
+---
+
 ## Why blockchain is useful here (narrow claim)
 
 Blockchain does **not** replace a congestion dashboard.

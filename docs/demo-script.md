@@ -1,8 +1,10 @@
-# Demo Script — Five-Minute Classroom Presentation
+# Demo Script — ≈ 5½-Minute Classroom Presentation
 
 **SignalLedger:** play-money congestion prediction — **library** MVP end-to-end · local Hardhat · **BU CAS CS595 / QST IT795**
 
 **Tip:** Speak slowly; skip live typing if nervous — refer to seeded script output (`npm run seed:local`) and the Evaluation page tab.
+
+**Total target ≈ 5:30** after adding the Decision Signal / Reflexivity slot. Trim the *Why blockchain?* section if running over.
 
 ---
 
@@ -71,11 +73,35 @@ Show **Settlement** (script or `/markets`): synthetic library series → **oracl
 
 > **Winner redeems** into internal credits — **losers settle at zero.**
 
-Then **Requests**: users **stake** play money toward dining / gym prompts until **threshold** activates the request (**no automated second full market deployment**).
+Then click `/requests`. Point at the blue **"Why staking instead of voting?"** panel and the priority badges, and say:
+
+> Users **stake** play-money credits toward dining-hall or gym requests. Stake costs something — credits leave your spendable balance — so high-stake requests reveal **real student demand**, not just upvotes. The page sorts by total stake and labels each request **Low / Medium / High Priority**, so the system can decide **what to forecast next**. When stake passes the activation threshold, the badge flips to *Activated · Ready for market launch* and a future version could use that pool to seed the new market's liquidity.
+
+(Optionally let one demo user stake into the dining-hall request to flip a Low → Medium badge live.)
 
 ---
 
-## 4:15–4:45 — Evaluation
+## 4:15–4:45 — Decision signal & reflexivity (≈ 30–45 s)
+
+Click back to `/markets`. Point at the **Decision Signal** card directly under the price tiles.
+
+Say:
+
+> The market price isn't just a number. We interpret it as a **decision signal** for students. Below 40 % YES probability we say *Low risk — library is manageable.* From 40 to 70 %, *Medium — check alternatives.* Above 70 %, *High — consider another study space between 8 and 10 PM.*
+
+Then click over to `/evaluation` and scroll to the **Forecast Reflexivity / Behavior Impact** section.
+
+Say:
+
+> Congestion forecasts are different from weather forecasts: the prediction can **change the outcome**. If 20 % of marginal visitors see a *High* signal and pick another space, the projected 89 % occupancy can drop to roughly 81 % — under the threshold. The market would then look "wrong" by raw accuracy, but it actually **reduced congestion**.
+
+Close the slot:
+
+> So a useful campus forecast should be evaluated by **decision usefulness**, not only by raw hit rate. The numbers in this card are illustrative — fixed for clarity, not a real behavioural model.
+
+---
+
+## 4:45–5:15 — Evaluation
 
 Say:
 
@@ -93,7 +119,7 @@ Adjust YES **bps** in the UI to match on-chain finals if demos diverge.
 
 ---
 
-## 4:45–5:00 — Limitations and close
+## 5:15–5:30 — Limitations and close
 
 Briefly hit:
 
@@ -105,6 +131,7 @@ Briefly hit:
 | **Play money**, no fiat |
 | **No production oracle** |
 | Single **canonical** MVP market wired end-to-end; dining/gym = **staking demos** |
+| **Behavioural impact card** is an illustrative, fixed-number scenario — *not* a real elasticity model |
 
 Closing line:
 

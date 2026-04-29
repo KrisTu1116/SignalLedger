@@ -165,6 +165,92 @@ export default function EvaluationPage() {
               </li>
             </ul>
           </section>
+
+          {/* Forecast Reflexivity / Behavior Impact */}
+          <section className="rounded-lg border bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-medium">
+                Forecast Reflexivity &amp; Behavior Impact
+              </h3>
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-800">
+                Illustrative impact simulation
+              </span>
+            </div>
+
+            <p className="mt-2 text-xs text-gray-600">
+              Congestion forecasts are <strong>reflexive</strong>: if the market
+              predicts crowding, students may avoid the location. Avoidance can
+              reduce the final observed occupancy. A forecast can therefore be
+              socially useful <em>even if</em> the final outcome ends up
+              different from the prediction.
+            </p>
+
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded border border-red-200 bg-red-50 p-3">
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-red-700">
+                  Raw forecast (no behavior change)
+                </div>
+                <div className="mt-2 space-y-1 text-sm text-red-900">
+                  <div>
+                    Projected max occupancy:{" "}
+                    <span className="font-mono font-bold">89%</span>
+                  </div>
+                  <div>
+                    Threshold:{" "}
+                    <span className="font-mono font-bold">85%</span>
+                  </div>
+                  <div>
+                    Predicted outcome:{" "}
+                    <span className="rounded bg-red-200 px-2 py-0.5 text-xs font-bold">
+                      YES (over threshold)
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded border border-green-200 bg-green-50 p-3">
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-green-700">
+                  Adjusted after 20% response
+                </div>
+                <div className="mt-2 space-y-1 text-sm text-green-900">
+                  <div>
+                    Adjusted max occupancy:{" "}
+                    <span className="font-mono font-bold">~81%</span>
+                  </div>
+                  <div>
+                    Assumption: 20% of marginal visitors see the warning and
+                    pick another study space.
+                  </div>
+                  <div>
+                    Observed outcome:{" "}
+                    <span className="rounded bg-green-200 px-2 py-0.5 text-xs font-bold">
+                      NO (under threshold)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-3 rounded border bg-blue-50 p-3 text-xs text-blue-900">
+              <strong>Interpretation:</strong> The forecast may look
+              &ldquo;inaccurate&rdquo; in raw accuracy terms (predicted YES,
+              observed NO), but it helped reduce congestion. For congestion
+              forecasts, <em>decision usefulness</em> matters as much as raw
+              hit rate.
+            </div>
+
+            <ul className="mt-3 list-inside list-disc space-y-1 text-[11px] text-gray-500">
+              <li>Illustrative impact simulation — fixed numbers for clarity.</li>
+              <li>
+                Not a production behavioral model — no real elasticity
+                estimation, no real student tracking.
+              </li>
+              <li>
+                Used to explain why congestion forecasts should be evaluated by
+                decision usefulness, not only raw accuracy.
+              </li>
+            </ul>
+          </section>
         </>
       )}
     </div>
