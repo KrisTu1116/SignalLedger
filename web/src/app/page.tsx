@@ -1,4 +1,5 @@
 import Link from "next/link";
+import WeeklyForecastPreview from "@/components/WeeklyForecastPreview";
 
 export default function Home() {
   return (
@@ -75,6 +76,8 @@ export default function Home() {
           </p>
         </Link>
       </div>
+
+      <WeeklyForecastPreview />
     </div>
   );
 }

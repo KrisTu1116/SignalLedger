@@ -133,6 +133,10 @@ Briefly hit:
 | Single **canonical** MVP market wired end-to-end; dining/gym = **staking demos** |
 | **Behavioural impact card** is an illustrative, fixed-number scenario — *not* a real elasticity model |
 
+Optional one-liner if scrolling on the home page (treat as future work, do not oversell):
+
+> The weekly heatmap preview shows how the one-slot MVP could scale into a full weekly campus congestion forecast grid — V2 preview only, no on-chain markets behind those cells.
+
 Closing line:
 
 > SignalLedger separates **prediction as commitment** supported by enforced rules — from dashboards that only rewind time.
