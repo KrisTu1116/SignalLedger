@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { href: "/markets", label: "Market" },
   { href: "/requests", label: "Requests" },
   { href: "/evaluation", label: "Evaluation" },
+  { href: "/audit", label: "Audit" },
 ];
 
 export default function RootLayout({

@@ -6,6 +6,7 @@ import {
   defineChain,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import SignalLedgerArtifact from "../../../contracts/artifacts/contracts/SignalLedger.sol/SignalLedger.json";
 
 const hardhatChain = defineChain({
   id: 31337,
@@ -59,43 +60,7 @@ export function getContractAddress(): Address {
   return contractAddress;
 }
 
-export const SIGNAL_LEDGER_ABI = [
-  { inputs: [], stateMutability: "nonpayable", type: "constructor" },
-  { anonymous: false, inputs: [{ indexed: true, internalType: "uint256", name: "marketId", type: "uint256" }], name: "MarketCreated", type: "event" },
-  { anonymous: false, inputs: [{ indexed: true, internalType: "uint256", name: "marketId", type: "uint256" }, { indexed: false, internalType: "uint256", name: "actualValue", type: "uint256" }, { indexed: false, internalType: "enum SignalLedger.Outcome", name: "winningOutcome", type: "uint8" }], name: "MarketSettled", type: "event" },
-  { anonymous: false, inputs: [{ indexed: true, internalType: "address", name: "user", type: "address" }, { indexed: true, internalType: "uint256", name: "marketId", type: "uint256" }, { indexed: false, internalType: "uint256", name: "payout", type: "uint256" }], name: "Redeemed", type: "event" },
-  { anonymous: false, inputs: [{ indexed: true, internalType: "uint256", name: "requestId", type: "uint256" }], name: "RequestActivated", type: "event" },
-  { anonymous: false, inputs: [{ indexed: true, internalType: "uint256", name: "requestId", type: "uint256" }, { indexed: false, internalType: "string", name: "question", type: "string" }], name: "RequestCreated", type: "event" },
-  { anonymous: false, inputs: [{ indexed: true, internalType: "address", name: "user", type: "address" }, { indexed: true, internalType: "uint256", name: "requestId", type: "uint256" }, { indexed: false, internalType: "uint256", name: "amount", type: "uint256" }], name: "StakedForRequest", type: "event" },
-  { anonymous: false, inputs: [{ indexed: true, internalType: "address", name: "user", type: "address" }, { indexed: true, internalType: "uint256", name: "marketId", type: "uint256" }, { indexed: false, internalType: "bool", name: "isYes", type: "bool" }, { indexed: false, internalType: "uint256", name: "shares", type: "uint256" }, { indexed: false, internalType: "uint256", name: "cost", type: "uint256" }], name: "TradePlaced", type: "event" },
-  { anonymous: false, inputs: [{ indexed: true, internalType: "address", name: "user", type: "address" }], name: "UserRegistered", type: "event" },
-  { inputs: [], name: "ACTIVATION_THRESHOLD", outputs: [{ internalType: "uint256", name: "", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [], name: "BPS", outputs: [{ internalType: "uint256", name: "", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [], name: "INITIAL_CREDITS", outputs: [{ internalType: "uint256", name: "", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [], name: "VIRTUAL_LIQUIDITY", outputs: [{ internalType: "uint256", name: "", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [], name: "admin", outputs: [{ internalType: "address", name: "", type: "address" }], stateMutability: "view", type: "function" },
-  { inputs: [{ internalType: "uint256", name: "_marketId", type: "uint256" }, { internalType: "uint256", name: "_shares", type: "uint256" }], name: "buyNo", outputs: [], stateMutability: "nonpayable", type: "function" },
-  { inputs: [{ internalType: "uint256", name: "_marketId", type: "uint256" }, { internalType: "uint256", name: "_shares", type: "uint256" }], name: "buyYes", outputs: [], stateMutability: "nonpayable", type: "function" },
-  { inputs: [{ internalType: "string", name: "_question", type: "string" }, { internalType: "string", name: "_locationName", type: "string" }, { internalType: "string", name: "_metricName", type: "string" }, { internalType: "uint256", name: "_threshold", type: "uint256" }, { internalType: "uint256", name: "_startTime", type: "uint256" }, { internalType: "uint256", name: "_endTime", type: "uint256" }, { internalType: "string", name: "_settlementSource", type: "string" }], name: "createMarket", outputs: [{ internalType: "uint256", name: "marketId", type: "uint256" }], stateMutability: "nonpayable", type: "function" },
-  { inputs: [{ internalType: "string", name: "_question", type: "string" }], name: "createMarketRequest", outputs: [{ internalType: "uint256", name: "requestId", type: "uint256" }], stateMutability: "nonpayable", type: "function" },
-  { inputs: [{ internalType: "address", name: "", type: "address" }], name: "credits", outputs: [{ internalType: "uint256", name: "", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [{ internalType: "uint256", name: "_marketId", type: "uint256" }], name: "getCurrentPrices", outputs: [{ internalType: "uint256", name: "yesPriceBps", type: "uint256" }, { internalType: "uint256", name: "noPriceBps", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [{ internalType: "uint256", name: "_marketId", type: "uint256" }], name: "getMarket", outputs: [{ internalType: "string", name: "question", type: "string" }, { internalType: "string", name: "locationName", type: "string" }, { internalType: "string", name: "metricName", type: "string" }, { internalType: "uint256", name: "threshold", type: "uint256" }, { internalType: "uint256", name: "startTime", type: "uint256" }, { internalType: "uint256", name: "endTime", type: "uint256" }, { internalType: "string", name: "settlementSource", type: "string" }, { internalType: "enum SignalLedger.MarketStatus", name: "status", type: "uint8" }, { internalType: "uint256", name: "actualValue", type: "uint256" }, { internalType: "enum SignalLedger.Outcome", name: "winningOutcome", type: "uint8" }, { internalType: "uint256", name: "yesDemand", type: "uint256" }, { internalType: "uint256", name: "noDemand", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [{ internalType: "uint256", name: "_requestId", type: "uint256" }], name: "getMarketRequest", outputs: [{ internalType: "string", name: "question", type: "string" }, { internalType: "address", name: "creator", type: "address" }, { internalType: "uint256", name: "totalStake", type: "uint256" }, { internalType: "bool", name: "activated", type: "bool" }], stateMutability: "view", type: "function" },
-  { inputs: [{ internalType: "address", name: "_user", type: "address" }], name: "getUserBalance", outputs: [{ internalType: "uint256", name: "", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [{ internalType: "address", name: "_user", type: "address" }, { internalType: "uint256", name: "_marketId", type: "uint256" }], name: "getUserPosition", outputs: [{ internalType: "uint256", name: "yes", type: "uint256" }, { internalType: "uint256", name: "no", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [], name: "marketCount", outputs: [{ internalType: "uint256", name: "", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [{ internalType: "address", name: "", type: "address" }, { internalType: "uint256", name: "", type: "uint256" }], name: "noShares", outputs: [{ internalType: "uint256", name: "", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [{ internalType: "uint256", name: "_marketId", type: "uint256" }], name: "redeem", outputs: [], stateMutability: "nonpayable", type: "function" },
-  { inputs: [{ internalType: "address", name: "", type: "address" }, { internalType: "uint256", name: "", type: "uint256" }], name: "redeemed", outputs: [{ internalType: "bool", name: "", type: "bool" }], stateMutability: "view", type: "function" },
-  { inputs: [], name: "register", outputs: [], stateMutability: "nonpayable", type: "function" },
-  { inputs: [{ internalType: "address", name: "", type: "address" }], name: "registered", outputs: [{ internalType: "bool", name: "", type: "bool" }], stateMutability: "view", type: "function" },
-  { inputs: [], name: "requestCount", outputs: [{ internalType: "uint256", name: "", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [{ internalType: "uint256", name: "_marketId", type: "uint256" }, { internalType: "uint256", name: "_actualValue", type: "uint256" }], name: "settleMarket", outputs: [], stateMutability: "nonpayable", type: "function" },
-  { inputs: [{ internalType: "uint256", name: "_requestId", type: "uint256" }, { internalType: "uint256", name: "_amount", type: "uint256" }], name: "stakeForRequest", outputs: [], stateMutability: "nonpayable", type: "function" },
-  { inputs: [{ internalType: "address", name: "", type: "address" }, { internalType: "uint256", name: "", type: "uint256" }], name: "userStake", outputs: [{ internalType: "uint256", name: "", type: "uint256" }], stateMutability: "view", type: "function" },
-  { inputs: [{ internalType: "address", name: "", type: "address" }, { internalType: "uint256", name: "", type: "uint256" }], name: "yesShares", outputs: [{ internalType: "uint256", name: "", type: "uint256" }], stateMutability: "view", type: "function" },
-] as const;
+export const SIGNAL_LEDGER_ABI = SignalLedgerArtifact.abi;
 
 // ── Clients ──
 
@@ -257,4 +222,64 @@ export async function stakeForRequest(
   amount: bigint,
 ) {
   return write(user, "stakeForRequest", [requestId, amount]);
+}
+
+export async function disputeMarket(
+  user: DemoUser,
+  marketId: bigint,
+  reason: string
+) {
+  return write(user, "disputeMarket", [marketId, reason]);
+}
+
+export async function readAuditEvents() {
+  const pub = getPublicClient();
+
+  const eventNames = [
+    "UserRegistered",
+    "MarketCreated",
+    "TradePlaced",
+    "MarketSettled",
+    "Redeemed",
+    "RequestCreated",
+    "StakedForRequest",
+    "RequestActivated",
+    "DisputeLogged",
+  ];
+
+  const latestBlock = await pub.getBlockNumber();
+
+  const allEvents: {
+    eventName: string;
+    blockNumber?: bigint;
+    transactionHash?: string;
+    args?: unknown;
+  }[] = [];
+
+  for (const eventName of eventNames) {
+    try {
+      const logs = await pub.getContractEvents({
+        address: contractAddress,
+        abi: SIGNAL_LEDGER_ABI,
+        eventName: eventName as any,
+        fromBlock: 0n,
+        toBlock: latestBlock,
+      });
+
+      for (const log of logs as any[]) {
+        allEvents.push({
+          eventName,
+          blockNumber: log.blockNumber,
+          transactionHash: log.transactionHash,
+          args: log.args,
+        });
+      }
+    } catch (err) {
+      console.warn(`Failed to load ${eventName}`, err);
+    }
+  }
+
+  return allEvents.sort((a, b) =>
+    Number((b.blockNumber ?? 0n) - (a.blockNumber ?? 0n))
+  );
 }

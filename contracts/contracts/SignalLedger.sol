@@ -5,6 +5,40 @@ pragma solidity ^0.8.27;
 /// @notice Play-money prediction market for campus congestion forecasting.
 ///         BU CAS CS595 / QST IT795 classroom demo.
 contract SignalLedger {
+    
+    // ----------------------------------------------------------------
+    // Struct
+    // ----------------------------------------------------------------
+    
+    struct Dispute {
+        address user;
+        string reason;
+        uint256 timestamp;
+    }
+
+    // ----------------------------------------------------------------
+    // Storage & Event
+    // ----------------------------------------------------------------
+    
+    mapping(uint256 => Dispute[]) public disputes;
+    event DisputeLogged(uint256 indexed marketId, address indexed user, string reason);
+
+    function disputeMarket(uint256 _marketId, string calldata _reason) external {
+        require(registered[msg.sender], "not registered");
+        require(bytes(_reason).length > 0, "empty reason");
+        require(_marketId < marketCount, "invalid market");
+
+        disputes[_marketId].push(
+            Dispute({
+                user: msg.sender,
+                reason: _reason,
+                timestamp: block.timestamp
+            })
+        );
+
+        emit DisputeLogged(_marketId, msg.sender, _reason);
+    }
+
     // ----------------------------------------------------------------
     // Constants
     // ----------------------------------------------------------------
@@ -148,6 +182,12 @@ contract SignalLedger {
         uint256 _endTime,
         string calldata _settlementSource
     ) external onlyAdmin returns (uint256 marketId) {
+        require(bytes(_question).length > 0, "empty question");
+        require(bytes(_locationName).length > 0, "empty location");
+        require(bytes(_metricName).length > 0, "empty metric");
+        require(bytes(_settlementSource).length > 0, "empty source");
+        require(_threshold <= 100, "invalid threshold");
+        require(_endTime > _startTime, "invalid time window");
         marketId = marketCount++;
         Market storage m = markets[marketId];
         m.question = _question;
@@ -272,6 +312,7 @@ contract SignalLedger {
         onlyRegistered
         returns (uint256 requestId)
     {
+        require(bytes(_question).length > 0, "empty question");
         requestId = requestCount++;
         requests[requestId].question = _question;
         requests[requestId].creator = msg.sender;

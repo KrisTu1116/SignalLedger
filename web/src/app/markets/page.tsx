@@ -17,6 +17,7 @@ import {
   buyNo,
   settleMarket,
   redeemShares,
+  disputeMarket,
 } from "@/lib/contract";
 import { computeLibrarySettlement } from "@/lib/oracle";
 
@@ -218,6 +219,20 @@ export default function MarketsPage() {
     } catch (e: unknown) {
       setTxStatus("error");
       setTxMsg(e instanceof Error ? e.message : "Redemption failed");
+    }
+  }
+
+  async function handleDispute() {
+    setTxStatus("loading");
+    setTxMsg("Submitting dispute...");
+    try {
+      await disputeMarket(selectedUser, marketId, "Incorrect occupancy data");
+      setTxStatus("success");
+      setTxMsg("Dispute submitted.");
+      await refresh();
+    } catch (e: unknown) {
+      setTxStatus("error");
+      setTxMsg(e instanceof Error ? e.message : "Dispute failed");
     }
   }
 
@@ -464,6 +479,23 @@ npm run seed:local        # Terminal 2 (optional)`}
             className="mt-2 rounded bg-gray-800 px-4 py-1.5 text-sm text-white hover:bg-gray-900 disabled:opacity-50"
           >
             Settle with Synthetic Data
+          </button>
+        </section>
+      )}
+
+      {/* Dispute */}
+      {isSettled && isRegistered && (
+        <section className="rounded-lg border bg-white p-4 shadow-sm">
+          <h4 className="text-sm font-medium text-red-600">Raise Dispute</h4>
+          <p className="mt-1 text-xs text-gray-500">
+            If you believe the settlement is incorrect, you can log a dispute on-chain.
+          </p>
+          <button
+            onClick={handleDispute}
+            disabled={txStatus === "loading"}
+            className="mt-2 rounded bg-red-600 px-4 py-1.5 text-sm text-white hover:bg-red-700 disabled:opacity-50"
+          >
+            Submit Dispute
           </button>
         </section>
       )}
