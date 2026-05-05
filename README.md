@@ -2,7 +2,7 @@
 
 ## 1. Project overview
 
-**SignalLedger** is a play-money prediction market prototype for short-horizon campus congestion forecasting.
+**SignalLedger** is a play-money prediction market prototype for short-horizon campus congestion forecasting, with **on-chain auditability and dispute logging**.
 
 **Course:** BU CAS CS595 / QST IT795 — *Blockchains and their Applications*
 
@@ -10,36 +10,60 @@
 
 > Will the library occupancy exceed 85% between 8 PM and 10 PM?
 
-Students register, trade YES/NO shares (internal credits only), see prices move after trades, settle the market using deterministic synthetic library occupancy data, redeem winning shares, optionally stake credits toward **candidate** dining-hall and gym markets, and compare the market’s implied probability to simple baselines.
+Students register, trade YES/NO shares (internal credits only), observe price updates, settle the market using deterministic synthetic data, redeem winning shares, and **verify all actions through an on-chain audit trail**.
 
-The project is a **local classroom demo**: no real money, no production deployment, no real student data.
+The system also allows users to **log disputes after settlement**, making disagreements transparent and permanently recorded on-chain.
+
+This project is a **local classroom demo**: no real money, no production deployment, no real student data.
 
 ---
 
 ## 2. Blockchain justification
 
-Blockchain is used as a **transparent rule-enforcement layer**, not as “the database for campus sensors.”
+Blockchain is used as a **transparent rule-enforcement and audit layer**, not as a storage system for campus data.
 
-On-chain rules include: who is registered, play-money balances, market state, YES/NO trades, price updates (via demand and a simple AMM formula), admin settlement, redemption, and activation staking. Anyone with the contract address and RPC can verify that balances and outcomes follow the same code.
+All critical actions are executed on-chain, including:
 
-A central server could store the same facts, but **a single operator could change balances or settlement off the record**. A smart contract commits the rules in public bytecode and makes state changes auditable through transactions and events.
+- User registration and balances
+- Market creation and state
+- Trades and price updates
+- Settlement outcomes
+- Redemption payouts
+- Dispute logging
 
+Additionally, **all events are emitted and can be inspected through an Audit Trail interface**, allowing any participant to reconstruct the full history of the market.
+
+A centralized system could store the same data, but:
+
+- Operators could silently modify balances or outcomes
+- Disputes could be hidden or deleted
+
+With smart contracts:
+
+- Rules are fixed in public bytecode
+- State transitions are immutable
+- All actions are **verifiable and auditable**
+
+This makes the system not just a prediction tool, but a **trust-minimized coordination mechanism**.
 ---
 
 ## 3. MVP scope
 
 **In scope:**
 
-- One fully wired **library occupancy** market (create → trade → settle → redeem).
-- Synthetic library occupancy data + oracle-style helper (max occupancy in 8–10 PM window vs 85% threshold).
-- Simple AMM-style pricing (not full LMSR).
-- Activation staking for **two candidate** questions (dining hall wait, gym occupancy) — staking only; they do not auto-deploy new full markets.
+- One fully wired **library occupancy** market (create → trade → settle → redeem)
+- Synthetic occupancy oracle (deterministic)
+- Simple AMM-style pricing
+- Activation staking for candidate markets
+- **Dispute logging (post-settlement, on-chain)**
+- **Audit Trail UI (view all on-chain events)**
 
-**Out of scope (by design):**
+**Out of scope:**
 
-- Real-money trading, ERC-20, or production wallet products.
-- Production oracle or real campus APIs.
-- Unlimited user-created markets; only admin-created official market + user-created *requests* with staking.
+- Real-money trading
+- Production oracle or APIs
+- Permissionless unlimited market creation
+- Automated dispute resolution (disputes are logged, not adjudicated)
 
 ---
 
@@ -119,6 +143,8 @@ npm run seed:local
 
 This registers **Alice** and **Bob**, creates the **library** market (threshold 85%), runs sample trades (Alice YES, Bob NO), and prints prices and positions.
 
+The seed script ensures the system is initialized with a complete demo scenario, including users, trades, and a live market ready for interaction and audit inspection.
+
 Optional — full settle + redeem via CLI:
 
 ```bash
@@ -154,10 +180,11 @@ The first three terminal steps **must run before** the frontend; the seed script
 | 2 | Terminal | `npm run deploy:local` — deploy `SignalLedger` |
 | 3 | Terminal | `npm run seed:local` — **create the library market** + register Alice/Bob + sample trades (and optionally `npm run settle:local`) |
 | 4 | Terminal | `cd ../web && npm run dev` — start the frontend |
-| 5 | Web: Home | Explain project and open **Market**, **Requests**, **Evaluation**. |
-| 6 | Web: `/markets` | Pick Alice/Bob/Carol, **Register**, **Buy YES / NO**, see prices refresh. Use **Settle with Synthetic Data** (admin path in UI), then **Redeem**. |
+| 5 | Web: Home | Explain project and open **Market**, **Requests**, **Evaluation**, **Aduit**. |
+| 6 | Web: `/markets` | Pick Alice/Bob/Carol, **Register**, **Buy YES / NO**, see prices refresh. Use **Settle with Synthetic Data** (admin path in UI), then **Redeem**. Submit **dispute** after settlement (optional)|
 | 7 | Web: `/requests` | Create candidate requests; **Stake** credits until activation threshold (**500**) is reached. |
 | 8 | Web: `/evaluation` | Adjust YES price (bps) to match final contract YES price if needed; compare market vs historical baseline vs poll. |
+| 9 | Web: `/audit` | View full on-chain event history |
 
 Minimal three-terminal overview:
 
@@ -178,6 +205,21 @@ Terminal 3:  cd web && npm run dev
 - **Simplified AMM** — educational price movement, not institutional market making.
 - **Small demo** — a few scripted traders; evaluation on one resolved event is illustrative, not statistically significant.
 - **Admin-created library market** in the default scripts; the UI demonstrates trading and settlement, not permissionless market creation for the MVP market.
+- - Disputes are **logged but not resolved automatically** — no arbitration mechanism in MVP
+- Audit Trail exposes transaction-level data (addresses truncated for UI clarity)
+
+---
+
+## 12. Key Features
+
+- **On-chain prediction market** with transparent pricing and settlement
+- **Audit Trail interface** — inspect all events (trades, settlement, disputes)
+- **Dispute logging** — users can challenge outcomes publicly
+- **Deterministic oracle simulation** — reproducible results for demos
+- **Evaluation module** — compare market forecasts vs baselines
+- **Reflexivity simulation** — demonstrates behavior impact of forecasts
+
+This design emphasizes **transparency, accountability, and interpretability**, rather than raw prediction accuracy.
 
 ---
 
